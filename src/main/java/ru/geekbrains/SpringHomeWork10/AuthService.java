@@ -1,8 +1,4 @@
 /*
-Домашнее задание
-
-Разработайте тесты для службы аутентификации
-AuthService
 . Этот сервис имеет методы
 login(String username, String password)
 ,
@@ -27,14 +23,25 @@ save
 Напишите тест, проверяющий корректное завершение сессии при выходе из системы.
 Желательно использовать spring security в работе
  */
+
 package ru.geekbrains.SpringHomeWork10;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import lombok.RequiredArgsConstructor;
 
-@SpringBootApplication
-public class SpringHomeWork10Application {
-    public static void main(String[] args) {
-        SpringApplication.run(SpringHomeWork10Application.class, args);
+import java.util.Optional;
+
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final SessionRepository sessionRepository;
+
+    public Optional<User> login(String userName, String password) {
+        Optional<User> user = userRepository.findByUserName(userName);
+        Optional<Session> session;
+        if (user.isPresent() && user.get().getPassword().equals(password)) {
+            session = sessionRepository.findByUser(user.get());
+        }
+
+        return null;
     }
 }
