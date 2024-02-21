@@ -1,35 +1,11 @@
-/*
-. Этот сервис имеет методы
-login(String username, String password)
-,
-register(User user)
-и
-logout(Long userId)
-. Служба использует
-UserRepository
-для управления данными пользователя и
-SessionRepository
-для управления сессионными данными.
-
-Создайте mock-объекты для
-UserRepository
-и
-SessionRepository
-.
-Напишите тест, который проверяет, что при успешной регистрации метод
-save
-репозитория пользователя вызывается.
-Напишите тест, который проверяет, что при входе в систему для существующего пользователя создается новая сессия.
-Напишите тест, проверяющий корректное завершение сессии при выходе из системы.
-Желательно использовать spring security в работе
- */
-
 package ru.geekbrains.SpringHomeWork10;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
@@ -37,11 +13,28 @@ public class AuthService {
 
     public Optional<User> login(String userName, String password) {
         Optional<User> user = userRepository.findByUserName(userName);
-        Optional<Session> session;
         if (user.isPresent() && user.get().getPassword().equals(password)) {
-            session = sessionRepository.findByUser(user.get());
+            sessionRepository.save(new Session(user.get()));
+            System.out.println("Логирование прошло успешно");
+            return user;
         }
+        System.out.println("Пользователь с данным логином или паролем не найден");
+        return Optional.empty();
+    }
 
-        return null;
+    public User register(User user) {
+        userRepository.save(user);
+        return user;
+    }
+
+    public void logout(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            Optional<Session> session = sessionRepository.findByUser(user.get());
+            session.ifPresent(sessionRepository::delete);
+            System.out.println("Сессия удачно закрыта");
+        } else {
+            System.out.println("Пользователь с данным id не найден");
+        }
     }
 }
